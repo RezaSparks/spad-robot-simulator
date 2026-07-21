@@ -94,7 +94,7 @@ TextMesh:
   m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
   m_Color:
     serializedVersion: 2
-    rgba: 4278190080
+    rgba: 4278190335
 --- !u!1 &3121404012518361737
 GameObject:
   m_ObjectHideFlags: 0
@@ -107,6 +107,7 @@ GameObject:
   - component: {fileID: 829382042515205097}
   - component: {fileID: 8343281631097586713}
   - component: {fileID: 6612685679076279846}
+  - component: {fileID: 3748029104718584912}
   m_Layer: 0
   m_Name: WaypointMarker
   m_TagString: Untagged
@@ -194,4 +195,23 @@ MonoBehaviour:
   markerRenderer: {fileID: 8343281631097586713}
   blinkInterval: 0.5
   labelFormat: '#{0}'
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  selectedColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+  editHoverColor: {r: 0, g: 0, b: 1, a: 1}
+  colorPropertyName: _Color
+  waypointIndex: -1
   isActiveMarker: 0
+--- !u!135 &3748029104718584912
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3121404012518361737}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}

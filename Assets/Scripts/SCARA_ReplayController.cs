@@ -1,35 +1,27 @@
 using UnityEngine;
 
-/// <summary>
-/// REPLAY LAYER. Holds an in-memory TrajectorySample[] and only ever
-/// performs: binary search -> LerpAngle -> apply rotation. Never solves
-/// IK, never allocates per frame.
-/// </summary>
 public class SCARA_ReplayController : MonoBehaviour
 {
     public Transform joint1;
     public Transform joint2;
 
-    [Header("Manual Speed Range (Generate/preview path only)")]
-    [Tooltip("Playback multiplier applied when the slider is at 0%.")]
+    [Header("Manual Speed Range")]
     public float minManualMultiplier = 0.25f;
-    [Tooltip("Playback multiplier applied when the slider is at 100%.")]
     public float maxManualMultiplier = 3f;
 
     private TrajectorySample[] samples;
     private float playbackElapsedTime;
-    private float speedMultiplier = 1f; // read ONCE at playback start, per spec
+    private float speedMultiplier = 1f;
     private bool isPlaying;
     private float totalDuration;
+    private bool hasReachedEnd = false;
 
-    /// <param name="useManualSpeedOverride">
-    /// True (Generate path): slider maps to [minManualMultiplier, maxManualMultiplier],
-    /// letting the user slow down OR speed up preview playback, and never
-    /// freezes at 0%. False (CSV Load path): slider is ignored entirely and
-    /// playback always runs at exactly 1x — the CSV's own Time column is
-    /// authoritative, so external data always plays back correctly regardless
-    /// of slider position.
-    /// </param>
+    public float CurrentTime => playbackElapsedTime;
+    public float TotalDuration => totalDuration;
+    public bool IsPlaying => isPlaying;
+
+    public event System.Action OnPlaybackComplete;
+
     public void LoadTrajectory(TrajectorySample[] data, float speedPercent0to100, bool useManualSpeedOverride = true)
     {
         samples = data;
@@ -46,16 +38,40 @@ public class SCARA_ReplayController : MonoBehaviour
         }
 
         playbackElapsedTime = 0f;
+        hasReachedEnd = false;
         isPlaying = samples.Length >= 2;
+        if (isPlaying)
+            Apply(0f);
     }
 
     public void Pause() { isPlaying = false; }
-    public void Resume() { if (samples != null && samples.Length >= 2) isPlaying = true; }
-    public void ResetToStart() { playbackElapsedTime = 0f; }
+    public void Resume() { if (samples != null && samples.Length >= 2 && !hasReachedEnd) isPlaying = true; }
+    public void ResetToStart() { playbackElapsedTime = 0f; hasReachedEnd = false; Apply(0f); }
+
+    public void StepForward(float stepSize = 0.01f)
+    {
+        if (samples == null || samples.Length < 2) return;
+        playbackElapsedTime = Mathf.Min(playbackElapsedTime + stepSize, totalDuration);
+        Apply(playbackElapsedTime);
+        if (playbackElapsedTime >= totalDuration)
+        {
+            isPlaying = false;
+            hasReachedEnd = true;
+            OnPlaybackComplete?.Invoke();
+        }
+    }
+
+    public void StepBackward(float stepSize = 0.01f)
+    {
+        if (samples == null || samples.Length < 2) return;
+        playbackElapsedTime = Mathf.Max(playbackElapsedTime - stepSize, 0f);
+        hasReachedEnd = false;
+        Apply(playbackElapsedTime);
+    }
 
     void Update()
     {
-        if (!isPlaying || samples == null || samples.Length < 2) return;
+        if (!isPlaying || samples == null || samples.Length < 2 || hasReachedEnd) return;
 
         playbackElapsedTime += Time.deltaTime * speedMultiplier;
 
@@ -64,6 +80,8 @@ public class SCARA_ReplayController : MonoBehaviour
             playbackElapsedTime = totalDuration;
             Apply(playbackElapsedTime);
             isPlaying = false;
+            hasReachedEnd = true;
+            OnPlaybackComplete?.Invoke();
             return;
         }
 
@@ -82,6 +100,8 @@ public class SCARA_ReplayController : MonoBehaviour
 
         float theta1 = Mathf.LerpAngle(samples[lo].theta1, samples[hi].theta1, segT);
         float theta2 = Mathf.LerpAngle(samples[lo].theta2, samples[hi].theta2, segT);
+
+        SCARA_IKSolver.ClampAngles(ref theta1, ref theta2);
 
         joint1.localRotation = Quaternion.Euler(0f, theta1, 0f);
         joint2.localRotation = Quaternion.Euler(0f, theta2, 0f);

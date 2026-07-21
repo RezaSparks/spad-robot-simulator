@@ -1,35 +1,41 @@
 using UnityEngine;
 
-/// <summary>
-/// Visual marker for one placed waypoint. Purely presentational — holds no
-/// IK/trajectory logic. SCARA_WaypointManager instantiates one of these per
-/// waypoint (Step 2), positions it at the exact plane-click point, and calls
-/// SetInfo() whenever that waypoint's data is created or changed.
-/// </summary>
+[RequireComponent(typeof(Collider))]
 public class SCARA_WaypointMarker : MonoBehaviour
 {
     [Header("Wiring (assign in the prefab, not at runtime)")]
-    public TextMesh infoText;       // child "3D Text" object
-    public Renderer markerRenderer; // child sphere's Mesh Renderer (the part that blinks)
+    public TextMesh infoText;
+    public Renderer markerRenderer;
 
     [Header("Blink Settings")]
-    [Tooltip("Seconds spent in each on/off phase.")]
     public float blinkInterval = 0.5f;
 
     [Header("Display Formatting")]
-
     public string labelFormat = "#{0}";
+
+    [Header("Selection Visualization")]
+    public Color normalColor = Color.white;
+    public Color hoverColor = new Color(1f, 0.85f, 0.2f);   // amber
+    public Color selectedColor = new Color(0.2f, 0.9f, 1f); // cyan
+    // NEW: blue glow for hover in Edit Mode
+    public Color editHoverColor = Color.blue;
+
+    [Tooltip("Shader color property to drive via MaterialPropertyBlock.")]
+    public string colorPropertyName = "_Color";
+
+    [HideInInspector] public int waypointIndex = -1;
 
     private float blinkTimer;
     private bool blinkOn = true;
 
-
-
     public bool isActiveMarker = false;
 
+    private bool isHovered = false;
+    private bool isSelectedMarker = false;
+    private bool editModeActive = false;  // NEW
 
-
-    // Auto-fills references if you forget to wire them by hand in the Inspector.
+    private MaterialPropertyBlock mpb;
+    private int colorPropertyId;
 
     void Reset()
     {
@@ -37,58 +43,82 @@ public class SCARA_WaypointMarker : MonoBehaviour
         if (infoText == null) infoText = GetComponentInChildren<TextMesh>();
     }
 
-    void Update()
-
+    void Awake()
     {
-
-        if (markerRenderer == null) return;
-
-
-
-        if (isActiveMarker)
-
-        {
-
-            blinkTimer += Time.deltaTime;
-
-            if (blinkTimer >= blinkInterval)
-
-            {
-
-                blinkTimer = 0f;
-
-                blinkOn = !blinkOn;
-
-                markerRenderer.enabled = blinkOn;
-
-            }
-
-        }
-
-        else
-
-        {
-
-            // Always visible, not blinking
-
-            markerRenderer.enabled = true;
-
-            blinkTimer = 0f;
-
-            blinkOn = true;
-
-        }
-
+        mpb = new MaterialPropertyBlock();
+        colorPropertyId = Shader.PropertyToID(colorPropertyName);
     }
 
-    /// <summary>
-    /// Call right after Instantiate(), and again any time this waypoint's
-    /// own data changes (kept as a public entry point for that, even though
-    /// nothing in the current codebase edits X/Z/theta after creation yet).
-    /// </summary>
+    void Start()
+    {
+        ApplyColor(normalColor);
+    }
+
+    void Update()
+    {
+        if (markerRenderer == null) return;
+
+        if (isActiveMarker)
+        {
+            blinkTimer += Time.deltaTime;
+            if (blinkTimer >= blinkInterval)
+            {
+                blinkTimer = 0f;
+                blinkOn = !blinkOn;
+                markerRenderer.enabled = blinkOn;
+            }
+        }
+        else
+        {
+            markerRenderer.enabled = true;
+            blinkTimer = 0f;
+            blinkOn = true;
+        }
+    }
+
     public void SetInfo(int displayIndex, Waypoint data)
     {
+        waypointIndex = displayIndex;
         if (infoText == null) return;
         infoText.text = (displayIndex + 1).ToString();
+    }
+
+    // NEW: called by the manager when Edit Mode toggles
+    public void SetEditMode(bool active)
+    {
+        editModeActive = active;
+        RefreshColor();
+    }
+
+    public void SetHovered(bool hovered)
+    {
+        isHovered = hovered;
+        RefreshColor();
+    }
+
+    public void SetSelected(bool selected)
+    {
+        isSelectedMarker = selected;
+        RefreshColor();
+    }
+
+    private void RefreshColor()
+    {
+        if (isSelectedMarker)
+            ApplyColor(selectedColor);
+        else if (isHovered && editModeActive)   // blue glow only in Edit Mode
+            ApplyColor(editHoverColor);
+        else if (isHovered)                     // amber hover (kept for consistency, though not used outside Edit Mode)
+            ApplyColor(hoverColor);
+        else
+            ApplyColor(normalColor);
+    }
+
+    private void ApplyColor(Color c)
+    {
+        if (markerRenderer == null) return;
+        markerRenderer.GetPropertyBlock(mpb);
+        mpb.SetColor(colorPropertyId, c);
+        markerRenderer.SetPropertyBlock(mpb);
     }
 }
