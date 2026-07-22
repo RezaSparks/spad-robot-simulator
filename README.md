@@ -1,6 +1,6 @@
 2-DOF SCARA Robot Simulator
 <p align="center">
-  <img src="Assets/Textures/SPAD_Logo.png" alt="SPAD Logo" width="120">
+  <img src="Assets/Textures/LOGO.png" alt="LOGO" width="120">
 </p>
 <p align="center">
   <b>An interactive 2-DOF SCARA robot simulator built with Unity</b><br>
