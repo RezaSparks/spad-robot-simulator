@@ -1,11 +1,14 @@
-2-DOF SCARA Robot Simulator
+# 2-DOF SCARA Robot Simulator
+
 <p align="center">
   <img src="Assets/Textures/LOGO.png" alt="LOGO" width="120">
 </p>
+
 <p align="center">
   <b>An interactive 2-DOF SCARA robot simulator built with Unity</b><br>
   Waypoint-based trajectory planning · Inverse kinematics · Real-time replay · CSV export/import
 </p>
+
 <p align="center">
   <a href="#features">Features</a> •
   <a href="#requirements">Requirements</a> •
@@ -14,15 +17,19 @@
   <a href="#architecture">Architecture</a> •
   <a href="#csv-format">CSV Format</a>
 </p>
-Features
-Interactive Waypoint Placement — Right-click anywhere on the work plane to place waypoints. The simulator automatically solves inverse kinematics and displays joint angles in real time.
-Trajectory Generation — Press Spacebar to generate a smooth, time-optimal joint-space trajectory across all waypoints. The planner respects joint limits, forbidden zones, and collision constraints.
-Real-Time Replay — Play, pause, step forward/backward, and scrub through trajectories at variable playback speeds (0.1×–5×).
-Collision Detection — Geometric self-collision checks, base-pillar proximity tests, and obstacle-box intersection detection keep the robot within safe operating envelopes.
-CSV Export / Import — Save trajectories as structured CSV files with full metadata, waypoint definitions, and time-series samples. Reload previously saved sessions with one click.
-Editable Waypoints — Enter Edit Mode to drag waypoints directly in the scene, reorder them in the UI list, or adjust per-waypoint speeds before generation.
-Camera Controls — Orbit (Alt + LMB), pan (MMB), and zoom (scroll wheel) with adjustable speed multipliers and on-screen display feedback.
-Visual Gizmos — Toggle joint-limit arcs, reachable-area rings, collision radii, and obstacle boxes directly in the Scene view.
+
+## Features
+
+*   **Interactive Waypoint Placement** — Right-click anywhere on the work plane to place waypoints. The simulator automatically solves inverse kinematics and displays joint angles in real time.
+*   **Trajectory Generation** — Press Spacebar to generate a smooth, time-optimal joint-space trajectory across all waypoints. The planner respects joint limits, forbidden zones, and collision constraints.
+*   **Real-Time Replay** — Play, pause, step forward/backward, and scrub through trajectories at variable playback speeds (0.1×–5×).
+*   **Collision Detection** — Geometric self-collision checks, base-pillar proximity tests, and obstacle-box intersection detection keep the robot within safe operating envelopes.
+*   **CSV Export / Import** — Save trajectories as structured CSV files with full metadata, waypoint definitions, and time-series samples. Reload previously saved sessions with one click.
+*   **Editable Waypoints** — Enter Edit Mode to drag waypoints directly in the scene, reorder them in the UI list, or adjust per-waypoint speeds before generation.
+*   **Camera Controls** — Orbit (Alt + LMB), pan (MMB), and zoom (scroll wheel) with adjustable speed multipliers and on-screen display feedback.
+*   **Visual Gizmos** — Toggle joint-limit arcs, reachable-area rings, collision radii, and obstacle boxes directly in the Scene view.
+
+## Requirements
 
 | Item             | Required                        |
 | ---------------- | ------------------------------- |
@@ -33,25 +40,33 @@ Visual Gizmos — Toggle joint-limit arcs, reachable-area rings, collision radii
 | **GPU**          | DX11-compatible                 |
 | **RAM**          | 4 GB minimum (8 GB recommended) |
 
-Quick Start
-1. Clone the repository
-   git clone https://github.com/RezaSparks/spad-robot-simulator.git
-   cd spad-robot-simulator
-2. Open in Unity
-Launch Unity Hub.
-Click Add → select the spad-robot-simulator project folder.
-Open the project with Unity 2020.3.49f1.
-Open the scene: Assets/Scenes/SampleScene.unity.
-3. Run the simulator
-Press Play in the Editor.
-Right-click on the ground plane in the Game view to place your first waypoint.
-Place additional waypoints as desired.
-Press Spacebar to generate the trajectory.
-Click Play (▶) to start replay.
+## Quick Start
 
+###  **Clone the repository**
+    ```bash
+    git clone https://github.com/RezaSparks/spad-robot-simulator.git
+    cd spad-robot-simulator
+### Open in Unity
 
-Usage
-Placing Waypoints
+1. Launch Unity Hub.
+2. Click **Add** → select the `spad-robot-simulator` project folder.
+3. Open the project with Unity `2020.3.49f1`.
+4. Open the scene: `Assets/Scenes/SampleScene.unity`.
+
+### Run the simulator
+
+1. Press **Play** in the Editor.
+2. Right-click on the ground plane in the **Game** view to place your first waypoint.
+3. Place additional waypoints as desired.
+4. Press **Spacebar** to generate the trajectory.
+5. Click **Play (▶)** to start replay.
+
+---
+
+## Usage
+
+### Placing Waypoints
+
 | Action                | How                                                                    |
 | --------------------- | ---------------------------------------------------------------------- |
 | **Add waypoint**      | Right-click on the work plane (ground collider)                        |
@@ -60,7 +75,8 @@ Placing Waypoints
 | **Drag waypoint**     | Enter **Edit Mode** (top-right button), then drag markers in the scene |
 | **Adjust speed**      | Select a waypoint row and use the **Speed** slider (default: 50%)      |
 
-Trajectory Controls
+### Trajectory Controls
+
 | Action                  | How                                                         |
 | ----------------------- | ----------------------------------------------------------- |
 | **Generate trajectory** | Press `Spacebar` or click the generate button               |
@@ -69,16 +85,19 @@ Trajectory Controls
 | **Clear all**           | Click **Clear** to remove all waypoints and trajectory data |
 | **Undo**                | Click **Undo** to revert the last waypoint action           |
 
-Playback Controls
+### Playback Controls
+
 | Action             | How                                                                   |
 | ------------------ | --------------------------------------------------------------------- |
 | **Play / Pause**   | Click **Play** (▶) / **Pause** (⏸)                                    |
 | **Step Forward**   | Click **Step Forward** (⏩) — advances **0.01 s** per click            |
 | **Step Backward**  | Click **Step Backward** (⏪) — rewinds **0.01 s** per click            |
 | **Playback speed** | Use the **Playback Speed** slider — range **0.1×–5×**, default **1×** |
-Note: Playback speed affects replay speed only; it does not regenerate the trajectory. Waypoint speed affects trajectory generation (sample spacing / timing)
 
-Camera Controls
+> **Note:** Playback speed affects replay speed only; it does not regenerate the trajectory. Waypoint speed affects trajectory generation (sample spacing / timing).
+
+### Camera Controls
+
 | Action               | Input                            |
 | -------------------- | -------------------------------- |
 | **Orbit**            | Alt + Left Mouse Button          |
@@ -86,7 +105,10 @@ Camera Controls
 | **Zoom**             | Mouse Scroll Wheel               |
 | **Speed multiplier** | Ctrl + Scroll Wheel (0.1×–5×)    |
 
-Architecture
+---
+
+## Architecture
+
 The simulator is organized into four architectural layers:
 ┌─────────────────────────────────────────────────────────────┐
 │                        UI Layer                             │
@@ -115,7 +137,8 @@ The simulator is organized into four architectural layers:
 │   Transforms · uGUI · Input · Colliders · SFB               │
 └─────────────────────────────────────────────────────────────┘
 
-Key Components
+### Key Components
+
 | Component                 | Responsibility                                               |
 | ------------------------- | ------------------------------------------------------------ |
 | `SCARA_WaypointManager`   | Waypoint list, marker spawning, selection, drag logic        |
@@ -127,6 +150,8 @@ Key Components
 | `SCARA_IKSolver`          | Pure math: forward/inverse kinematics, angle unwrapping      |
 | `SCARA_CollisionChecker`  | Geometric tests: segment-circle, segment-AABB                |
 | `SCARA_CSVSerializer`     | CSV import/export with metadata and waypoint headers         |
+
+---
 
 Robot Specifications
 | Parameter              | Value                               |
@@ -144,8 +169,13 @@ Robot Specifications
 | **Elbow-up**           | θ₂ > 0°                             |
 | **Elbow-down**         | θ₂ < 0°                             |
 
-CSV Format
-Exported trajectory files follow a strict schema with metadata headers, waypoint definitions, and time-series samples.
+---
+
+## CSV Format
+
+Exported trajectory files follow a strict schema with metadata headers, waypoint definitions, and time‑series samples.
+
+```csv
 # ROBOT PARAMS: Arm2=1.6 MaxSpeed=180 Samples=12253
 # Generated: 2026-07-21 15:38:47
 # WAYPOINTS:
@@ -161,17 +191,7 @@ Time,X,Z,Theta1,Theta2
 0.001,0.00015,3.45,0.03041,-0.06
 0.002,0.0003,3.45,0.06082,-0.12
 ...
-Columns
-| Column   | Type  | Unit | Description                                   |
-| -------- | ----- | ---- | --------------------------------------------- |
-| `Time`   | float | s    | Monotonically increasing timestamp            |
-| `X`      | float | m    | End-effector world-space X coordinate         |
-| `Z`      | float | m    | End-effector world-space Z coordinate         |
-| `Theta1` | float | deg  | Joint 1 angle relative to +Z zero pose        |
-| `Theta2` | float | deg  | Joint 2 angle relative to fully extended pose |
-
-Waypoint Header Format
-Each # WP: line contains: X, Z, Theta1, Theta2, SpeedPercent
+```
 
 spad-robot-simulator/
 ├── Assets/
